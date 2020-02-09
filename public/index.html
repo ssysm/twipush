@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+    <title>Document</title>
+</head>
+<body>
+<nav>
+    <div class="nav-wrapper">
+        <a href="/index.html" class="brand-logo">TwiPush</a>
+        <ul id="nav-mobile" class="right hide-on-med-and-down">
+            <li><a href="/index.html">Home</a></li>
+            <li><a href="/tracker.html">Tracker</a></li>
+        </ul>
+    </div>
+</nav>
+<div class="container" id="main">
+</div>
+</body>
+<script>
+    const containerElm = document.querySelector('#main');
+        let contentHtml = "";
+        axios.get('/tweet/latest')
+            .then(res => res.data.result)
+            .then(data => {
+                data.map(d => {
+                    containerElm.innerHTML += `
+                    <div class="row">
+                    <div class="card">
+                        <div class="card-title">
+                            ${d.user.screen_name} (${d.user.name})
+                            <br>
+                            ${d.created_at}
+                        </div>
+                         <div class="card-content">
+                            ${d.text}
+                            <br>
+                            <a href="${window.location.origin}/tweet.html?id=${d.id_str}" class="btn">View Tweet Page</a>
+                        </div>
+                        <div class="card-action">
+                        ${constructDownloadLink(d.extended_entities)}
+                        </div>
+                     </div>
+                     </div>
+                    `
+                })
+            })
+
+    constructDownloadLink = (entities)=>{
+        if(entities.length > 0)
+        {
+            let downloadLink = "";
+            let counter = 0;
+            for(let item of entities[0].media){
+                counter++;
+                downloadLink += `<a href="${window.location.origin}/static/${item.id_str}${item.type === 'photo' ? ".png":".mp4"}">Download media ${counter}</a>`
+            }
+            return downloadLink;
+        }else{
+            return "<span>No Media</span>";
+        }
+    }
+</script>
+</html>

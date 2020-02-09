@@ -1,0 +1,7 @@
+node_modules/
+env/*.env
+.vscode/
+.vs/
+.idea/
+public/static/*.png
+public/static/*.mp4
