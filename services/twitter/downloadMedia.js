@@ -4,6 +4,7 @@ const path = require('path');
 module.exports = async(entities_list)=>{
     entities_list.map((d)=>{
         if(d.type === 'video'){
+            d.video_info.variants = stripeVideos(d.video_info.variants);
             downloadImage(d);
             downloadVideo(d.video_info.variants[0].url,d.id_str,()=>{
                 console.log('[INFO] Downloaded media(video) from ' + d.media_url_https);
@@ -53,4 +54,8 @@ const downloadVideo = (video_url, id_str, callback)=>{
             console.error('[ERROR] Fail to download media(video) from twitter.')
         })
         .finally(callback);
+}
+
+const stripeVideos = (videoArr)=>{
+    return videoArr.filter(obj => obj.content_type === "video/mp4")
 }
