@@ -43,12 +43,14 @@
                             ${d.created_at}
                         </div>
                          <div class="card-content">
-                            ${d.text}
+                            <p>
+                            ${d.truncated ? d.extended_tweet.full_text: d.text}
+                            </p>
                             <br>
                             <a href="${window.location.origin}/tweet.html?id=${d.id_str}" class="btn">View Tweet Page</a>
                         </div>
                         <div class="card-action">
-                        ${constructDownloadLink(d.extended_entities)}
+                        ${d.truncated ? constructDownloadLink(d.extended_tweet.extended_entities.media): d.extended_entities.length > 0 ?  constructDownloadLink(d.extended_entities[0].media): "No Media"}
                         </div>
                      </div>
                      </div>
@@ -61,7 +63,7 @@
         {
             let downloadLink = "";
             let counter = 0;
-            for(let item of entities[0].media){
+            for(let item of entities){
                 counter++;
                 downloadLink += `<a href="${window.location.origin}/static/${item.id_str}${item.type === 'photo' ? ".png":".mp4"}">Download media ${counter}</a>`
             }

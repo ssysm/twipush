@@ -29,7 +29,8 @@ module.exports.runner = async()=>{
 
     const stream = T.stream('statuses/filter', {
         follow: followIDs,
-        filter_level:'none'
+        filter_level:'none',
+
     })
     //Stream Event
     stream.on('tweet', function (tweet) {
@@ -38,15 +39,22 @@ module.exports.runner = async()=>{
             .create(tweet,(err,docs)=>{
                 if(err){
                     console.error(err)
-                } else{
-                    if(docs.extended_entities.length !== 0)
-                    {
-                        mediaDownloader(docs.extended_entities[0].media)
+                } else
+                    if(docs.truncated) {
+                        if(docs.extended_tweet.extended_entities.media.length !== 0)
+                        {
+                            mediaDownloader(docs.extended_tweet.extended_entities.media)
+                        }
+                        webhookInterface.trigger({data: { user: docs.user.screen_name, _id: docs.id_str, text: docs.extended_tweet.full_text}});
+                    }else{
+                        if(docs.extended_entities.length !== 0)
+                        {
+                            mediaDownloader(docs.extended_entities[0].media)
+                        }
+                        webhookInterface.trigger({data: { user: docs.user.screen_name, _id: docs.id_str, text: docs.text}});
                     }
-                    webhookInterface.trigger({data: { user: docs.user.screen_name, _id: docs.id_str, text: docs.text}});
                     console.log(`[INFO] New tweet from ${docs.user.screen_name} stored with id ${docs.id_str}`)
-                }
-            })
+                })
         }
         else{
             console.log(`[WARN] Rejected Tweet from ${tweet.user.screen_name}(${tweet.user.id_str}), not in list.`)
