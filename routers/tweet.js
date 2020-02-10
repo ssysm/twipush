@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.get('/latest', (req,res)=>{
 	Tweet
-		.find()
+		.find({isFeed: true })
 		.sort({created_at: -1})
 		.limit(120)
 		.exec((err, docs)=>{

@@ -88,6 +88,10 @@ const TweetSchema = new mongoose.Schema({
     },
     "lang": {
         "type": "String"
+    },
+    isFeed:{
+       type: Boolean,
+       default: true
     }
 });
 const model = mongoose.model('tweet', TweetSchema);

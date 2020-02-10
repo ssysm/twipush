@@ -35,9 +35,11 @@
                         <span id="content"></span>
                         <div class="card-content">
                             <span id="retweet"></span>
+                            <span id="quoted"></span>
                         </div>
                         <br/>
-                        <div id="media"></div>
+
+                        <div class="row" id="media"></div>
                     </div>
                 </div>
             </div>
@@ -46,122 +48,76 @@
     const urlParams = new URLSearchParams(window.location.search);
     const idParam = urlParams.get('id');
     const nameElm = document.querySelector('#name'),
+            mainElm = document.querySelector('#main'),
             dateElm = document.querySelector('#date'),
             contentElm = document.querySelector('#content'),
-            retweetElm = document.querySelector('#retweet');
+            retweetElm = document.querySelector('#retweet'),
+            quotedElm = document.querySelector('#quoted');
             mediaElm = document.querySelector('#media');
     axios.get('/tweet/' + idParam)
     .then(res=> res.data.result)
     .then(data=>{
+        if(data == null) mainElm .innerHTML = ('404 Tweet Not Found')
         nameElm.innerHTML = data.user.name + '(' + data.user.screen_name + ')';
         dateElm.innerHTML = new Date(data.created_at).toLocaleString();
         contentElm.innerHTML = data.truncated ? data.extended_tweet.full_text: data.text;
         retweetElm.innerHTML = typeof data.retweeted_status === "object" ? (data.retweeted_status.truncated ? data.retweeted_status.extended_tweet.full_text: data.retweeted_status.text) : "";
+        quotedElm.innerHTML = data.is_quote_status ? (data.quoted_status.truncated ? data.quoted_status.extended_tweet.full_text: data.quoted_status.text) : "";
+
         if(typeof data.retweeted_status === "object")
         {
-            data = data.retweeted_status;
-            if(data.truncated){
-                if(data.extended_tweet.extended_entities.media.length > 0)
-                {
-                    for(let item of data.extended_tweet.extended_entities.media)
-                    {
-                        if(item.type === 'photo')
-                        {
-                            mediaElm.innerHTML += `
-                        <img src="${window.location.origin}/static/${item.id_str}.png" alt="${item.media_url_https}" class="responsive-img"/>
+            buildContent(data.retweeted_status)
+        }
+        else if(data.is_quote_status)
+        {
+            buildContent(data.quoted_status)
+        }
+            buildContent(data);
+    })
+
+    const buildMediaContent = (entities)=>{
+        for(let item of entities)
+        {
+            if(item.type === 'photo')
+            {
+                mediaElm.innerHTML += `
+                        <img src="${window.location.origin}/static/${item.id_str}.png" alt="${item.media_url_https}" class="responsive-img col m3 s12"/>
                     `
-                        }
-                        else if(item.type === 'video')
-                        {
-                            mediaElm.innerHTML += `
+            }
+            else if(item.type === 'video')
+            {
+                mediaElm.innerHTML += `
                         <video width="320" height="240" controls>
                             <source src="${window.location.origin}/static/${item.id_str}.mp4" type="video/mp4">
                             <source src="${item.video_info.variants[0].url}" type="video/mp4">
                             Your browser does not support the video tag.
                         </video>
                     `
-                        }
-                    }
-                }
-            }else{
-                if(data.extended_entities.length > 0)
-                {
-                    for(let item of data.extended_entities[0].media)
-                    {
-                        if(item.type === 'photo')
-                        {
-                            mediaElm.innerHTML += `
-                        <img src="${window.location.origin}/static/${item.id_str}.png" alt="${item.media_url_https}" class="responsive-img"/>
-                    `
-                        }
-                        else if(item.type === 'video')
-                        {
-                            mediaElm.innerHTML += `
-                        <video width="320" height="240" controls>
-                            <source src="${window.location.origin}/static/${item.id_str}.mp4" type="video/mp4">
-                            <source src="${stripeVideos(item.video_info.variants)[0].url}" type="video/mp4">
-                            Your browser does not support the video tag.
-                        </video>
-                    `
-                        }
-                    }
-                }
+            }
+        }
+    }
+
+    const buildContent= (tweet)=>{
+        if(tweet.truncated){
+            if(tweet.extended_tweet.extended_entities.media.length > 0)
+            {
+                buildMediaContent(tweet.extended_tweet.extended_entities.media)
             }
         }else{
-            if(data.truncated){
-                if(data.extended_tweet.extended_entities.media.length > 0)
+            if(tweet.extended_entities !== undefined)
+            {
+                if(Array.isArray(tweet.extended_entities))
                 {
-                    for(let item of data.extended_tweet.extended_entities.media)
-                    {
-                        if(item.type === 'photo')
-                        {
-                            mediaElm.innerHTML += `
-                        <img src="${window.location.origin}/static/${item.id_str}.png" alt="${item.media_url_https}" class="responsive-img"/>
-                    `
-                        }
-                        else if(item.type === 'video')
-                        {
-                            mediaElm.innerHTML += `
-                        <video width="320" height="240" controls>
-                            <source src="${window.location.origin}/static/${item.id_str}.mp4" type="video/mp4">
-                            <source src="${item.video_info.variants[0].url}" type="video/mp4">
-                            Your browser does not support the video tag.
-                        </video>
-                    `
-                        }
+                    if(tweet.extended_entities.length > 0){
+                        buildMediaContent(tweet.extended_entities[0].media)
                     }
-                }
-            }else{
-                if(data.extended_entities.length > 0)
-                {
-                    for(let item of data.extended_entities[0].media)
-                    {
-                        if(item.type === 'photo')
-                        {
-                            mediaElm.innerHTML += `
-                        <img src="${window.location.origin}/static/${item.id_str}.png" alt="${item.media_url_https}" class="responsive-img"/>
-                    `
-                        }
-                        else if(item.type === 'video')
-                        {
-                            mediaElm.innerHTML += `
-                        <video width="320" height="240" controls>
-                            <source src="${window.location.origin}/static/${item.id_str}.mp4" type="video/mp4">
-                            <source src="${stripeVideos(item.video_info.variants)[0].url}" type="video/mp4">
-                            Your browser does not support the video tag.
-                        </video>
-                    `
-                        }
-                    }
+                }else{
+                    buildMediaContent(tweet.extended_entities.media)
                 }
             }
         }
-
-    })
-
-    const stripeVideos = (videoArr)=>{
-        return videoArr.filter(obj => obj.content_type === "video/mp4")
     }
+
 </script>
 </body>
 </html>

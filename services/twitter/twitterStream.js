@@ -1,9 +1,8 @@
-const Twit = require('twit')
+const Twit = require('twit');
 const {Tracker, Tweet} = require('../../models');
-const mediaDownloader = require('./downloadMedia');
-const checkDBList = require('./checkFromDBList');
-const webhookInterface = require('./../webhook/hookModifier');
-
+const checkDBList = require('./../../utils/filterElement');
+const webhookTrigger = require('./../../utils/webhookTrigger');
+const { handleTweet } = require('./tweetHandler');
 module.exports.runner = async () => {
     //Init Twti
     const T = new Twit({
@@ -29,8 +28,7 @@ module.exports.runner = async () => {
 
     const stream = T.stream('statuses/filter', {
         follow: followIDs,
-        filter_level: 'none',
-
+        filter_level: 'none'
     })
     //Stream Event
     stream.on('tweet', function (tweet) {
@@ -39,28 +37,9 @@ module.exports.runner = async () => {
                 .create(tweet, (err, docs) => {
                     if (err) {
                         console.error(err)
-                    } else if (docs.truncated) {
-                        if (docs.extended_tweet.extended_entities.media.length !== 0) {
-                            mediaDownloader(docs.extended_tweet.extended_entities.media)
-                        } else if(docs.retweeted_status)
-                        webhookInterface.trigger({
-                            data: {
-                                user: docs.user.screen_name,
-                                _id: docs.id_str,
-                                text: docs.extended_tweet.full_text
-                            }
-                        });
                     } else {
-                        if (docs.extended_entities.length !== 0) {
-                            mediaDownloader(docs.extended_entities[0].media)
-                        }
-                        webhookInterface.trigger({
-                            data: {
-                                user: docs.user.screen_name,
-                                _id: docs.id_str,
-                                text: docs.text
-                            }
-                        });
+                        handleTweet(docs)
+                        webhookTrigger({user: docs.user.screen_names, uid: docs.id_str, text: docs.text})
                     }
                     console.log(`[INFO] New tweet from ${docs.user.screen_name} stored with id ${docs.id_str}`)
                 })

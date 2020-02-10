@@ -43,7 +43,8 @@
                             ${new Date(d.created_at).toLocaleString()}
                         </div>
                          <div class="card-content">
-                            <span id="retweet_status">${typeof d.retweeted_status === "object" ? "<b>Retweeted</b>": ""}</span>
+                            <span id="retweet_status">${typeof d.retweeted_status === "object" || typeof  d.quoted_status === "object" ? "<b>Retweeted</b>": ""}</span>
+                            <span id="reply_status">${d.in_reply_to_status_id_str !== null? "<b>Replied</b>" : ""}</span>
                             <p>
                             ${d.truncated ? d.extended_tweet.full_text: d.text}
                             </p>
@@ -53,8 +54,6 @@
                         </div>
                         <div class="card-action">
                         ${d.truncated ? constructDownloadLink(d.extended_tweet.extended_entities.media,false): d.extended_entities.length > 0 ?  constructDownloadLink(d.extended_entities[0].media,false): "No Tweet Media"}
-                        ${typeof d.retweeted_status === "object" ? d.retweeted_status.truncated ? constructDownloadLink(d.retweeted_status.extended_tweet.extended_entities.media, true)
-                                : d.retweeted_status.extended_entities.media !==null ? constructDownloadLink(d.retweeted_status.extended_entities.media, true): "No Retweet Media" : "No Retweet Media"}
                         </div>
                      </div>
                      </div>
@@ -62,7 +61,7 @@
                 })
             })
 
-    constructDownloadLink = (entities,isretweet)=>{
+    const constructDownloadLink = (entities,isretweet)=>{
         if(entities.length > 0)
         {
             let downloadLink = "";

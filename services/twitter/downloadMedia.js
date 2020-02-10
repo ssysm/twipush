@@ -31,11 +31,11 @@ const downloadImage = ({media_url_https,id_str},callback) =>{
     })
         .then((response)=>{
             response.data.pipe(fs.createWriteStream(path.join(__dirname,process.env.STATIC_FILES, id_str+'.png')));
+            callback();
         })
         .catch((e)=>{
             console.error('[ERROR] Fail to download media(photo) from twitter.')
         })
-        .finally(callback);
 };
 
 const downloadVideo = (video_url, id_str, callback)=>{
@@ -49,11 +49,11 @@ const downloadVideo = (video_url, id_str, callback)=>{
     })
         .then((response)=>{
             response.data.pipe(fs.createWriteStream(path.join(__dirname, process.env.STATIC_FILES, id_str+'.mp4')))
+            callback()
         })
         .catch((e)=> {
             console.error('[ERROR] Fail to download media(video) from twitter.')
         })
-        .finally(callback);
 }
 
 const stripeVideos = (videoArr)=>{
