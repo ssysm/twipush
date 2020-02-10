@@ -38,19 +38,23 @@
                     <div class="row">
                     <div class="card">
                         <div class="card-title">
-                            ${d.user.screen_name} (${d.user.name})
+                            ${d.user.name} (${d.user.screen_name})
                             <br>
-                            ${d.created_at}
+                            ${new Date(d.created_at).toLocaleString()}
                         </div>
                          <div class="card-content">
+                            <span id="retweet_status">${typeof d.retweeted_status === "object" ? "<b>Retweeted</b>": ""}</span>
                             <p>
                             ${d.truncated ? d.extended_tweet.full_text: d.text}
                             </p>
                             <br>
                             <a href="${window.location.origin}/tweet.html?id=${d.id_str}" class="btn">View Tweet Page</a>
+                            ${ d.in_reply_to_status_id_str !== null? `<a href="${window.location.origin}/tweet.html?id=${d.in_reply_to_status_id_str}" class="btn">View Reply Tweet</a>` : ``}
                         </div>
                         <div class="card-action">
-                        ${d.truncated ? constructDownloadLink(d.extended_tweet.extended_entities.media): d.extended_entities.length > 0 ?  constructDownloadLink(d.extended_entities[0].media): "No Media"}
+                        ${d.truncated ? constructDownloadLink(d.extended_tweet.extended_entities.media,false): d.extended_entities.length > 0 ?  constructDownloadLink(d.extended_entities[0].media,false): "No Tweet Media"}
+                        ${typeof d.retweeted_status === "object" ? d.retweeted_status.truncated ? constructDownloadLink(d.retweeted_status.extended_tweet.extended_entities.media, true)
+                                : d.retweeted_status.extended_entities.media !==null ? constructDownloadLink(d.retweeted_status.extended_entities.media, true): "No Retweet Media" : "No Retweet Media"}
                         </div>
                      </div>
                      </div>
@@ -58,14 +62,15 @@
                 })
             })
 
-    constructDownloadLink = (entities)=>{
+    constructDownloadLink = (entities,isretweet)=>{
         if(entities.length > 0)
         {
             let downloadLink = "";
             let counter = 0;
             for(let item of entities){
                 counter++;
-                downloadLink += `<a href="${window.location.origin}/static/${item.id_str}${item.type === 'photo' ? ".png":".mp4"}">Download media ${counter}</a>`
+                downloadLink += `<a href="${window.location.origin}/static/${item.id_str}${item.type === 'photo' ? ".png":".mp4"}">
+                    ${isretweet ? `<span style='color: cornflowerblue'>RETWEET Media ${counter}</span>`: `Media ` + counter}</a>`
             }
             return downloadLink;
         }else{

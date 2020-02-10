@@ -10,7 +10,7 @@ module.exports = async(entities_list)=>{
                 console.log('[INFO] Downloaded media(video) from ' + d.media_url_https);
             });
         }
-        if(d.type === 'photo'){
+        else if(d.type === 'photo'){
             downloadImage(d, ()=>{
                 console.log('[INFO] Downloaded media from(photo) ' + d.media_url_https);
             })

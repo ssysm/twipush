@@ -68,6 +68,9 @@ const TweetSchema = new mongoose.Schema({
     "is_quote_status": {
         "type": "Boolean"
     },
+    quoted_status: {
+        "type": "Mixed"
+    },
     "retweet_count": {
         "type": "Number"
     },

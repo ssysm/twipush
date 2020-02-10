@@ -33,7 +33,10 @@
                     </div>
                     <div class="card-content">
                         <span id="content"></span>
-                        <br>
+                        <div class="card-content">
+                            <span id="retweet"></span>
+                        </div>
+                        <br/>
                         <div id="media"></div>
                     </div>
                 </div>
@@ -45,6 +48,7 @@
     const nameElm = document.querySelector('#name'),
             dateElm = document.querySelector('#date'),
             contentElm = document.querySelector('#content'),
+            retweetElm = document.querySelector('#retweet');
             mediaElm = document.querySelector('#media');
     axios.get('/tweet/' + idParam)
     .then(res=> res.data.result)
@@ -52,49 +56,102 @@
         nameElm.innerHTML = data.user.name + '(' + data.user.screen_name + ')';
         dateElm.innerHTML = new Date(data.created_at).toLocaleString();
         contentElm.innerHTML = data.truncated ? data.extended_tweet.full_text: data.text;
-        if(data.truncated){
-            if(data.extended_tweet.extended_entities.media.length > 0)
-            {
-                for(let item of data.extended_tweet.extended_entities.media)
+        retweetElm.innerHTML = typeof data.retweeted_status === "object" ? (data.retweeted_status.truncated ? data.retweeted_status.extended_tweet.full_text: data.retweeted_status.text) : "";
+        if(typeof data.retweeted_status === "object")
+        {
+            data = data.retweeted_status;
+            if(data.truncated){
+                if(data.extended_tweet.extended_entities.media.length > 0)
                 {
-                    if(item.type === 'photo')
+                    for(let item of data.extended_tweet.extended_entities.media)
                     {
-                        mediaElm.innerHTML += `
+                        if(item.type === 'photo')
+                        {
+                            mediaElm.innerHTML += `
                         <img src="${window.location.origin}/static/${item.id_str}.png" alt="${item.media_url_https}" class="responsive-img"/>
                     `
-                    }
-                    else if(item.type === 'video')
-                    {
-                        mediaElm.innerHTML += `
+                        }
+                        else if(item.type === 'video')
+                        {
+                            mediaElm.innerHTML += `
                         <video width="320" height="240" controls>
                             <source src="${window.location.origin}/static/${item.id_str}.mp4" type="video/mp4">
                             <source src="${item.video_info.variants[0].url}" type="video/mp4">
                             Your browser does not support the video tag.
                         </video>
                     `
+                        }
                     }
                 }
-            }
-        }else{
-            if(data.extended_entities.length > 0)
-            {
-                for(let item of data.extended_entities[0].media)
+            }else{
+                if(data.extended_entities.length > 0)
                 {
-                    if(item.type === 'photo')
+                    for(let item of data.extended_entities[0].media)
                     {
-                        mediaElm.innerHTML += `
+                        if(item.type === 'photo')
+                        {
+                            mediaElm.innerHTML += `
                         <img src="${window.location.origin}/static/${item.id_str}.png" alt="${item.media_url_https}" class="responsive-img"/>
                     `
-                    }
-                    else if(item.type === 'video')
-                    {
-                        mediaElm.innerHTML += `
+                        }
+                        else if(item.type === 'video')
+                        {
+                            mediaElm.innerHTML += `
                         <video width="320" height="240" controls>
                             <source src="${window.location.origin}/static/${item.id_str}.mp4" type="video/mp4">
                             <source src="${stripeVideos(item.video_info.variants)[0].url}" type="video/mp4">
                             Your browser does not support the video tag.
                         </video>
                     `
+                        }
+                    }
+                }
+            }
+        }else{
+            if(data.truncated){
+                if(data.extended_tweet.extended_entities.media.length > 0)
+                {
+                    for(let item of data.extended_tweet.extended_entities.media)
+                    {
+                        if(item.type === 'photo')
+                        {
+                            mediaElm.innerHTML += `
+                        <img src="${window.location.origin}/static/${item.id_str}.png" alt="${item.media_url_https}" class="responsive-img"/>
+                    `
+                        }
+                        else if(item.type === 'video')
+                        {
+                            mediaElm.innerHTML += `
+                        <video width="320" height="240" controls>
+                            <source src="${window.location.origin}/static/${item.id_str}.mp4" type="video/mp4">
+                            <source src="${item.video_info.variants[0].url}" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    `
+                        }
+                    }
+                }
+            }else{
+                if(data.extended_entities.length > 0)
+                {
+                    for(let item of data.extended_entities[0].media)
+                    {
+                        if(item.type === 'photo')
+                        {
+                            mediaElm.innerHTML += `
+                        <img src="${window.location.origin}/static/${item.id_str}.png" alt="${item.media_url_https}" class="responsive-img"/>
+                    `
+                        }
+                        else if(item.type === 'video')
+                        {
+                            mediaElm.innerHTML += `
+                        <video width="320" height="240" controls>
+                            <source src="${window.location.origin}/static/${item.id_str}.mp4" type="video/mp4">
+                            <source src="${stripeVideos(item.video_info.variants)[0].url}" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    `
+                        }
                     }
                 }
             }
