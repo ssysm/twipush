@@ -5,3 +5,4 @@ env/*.env
 .idea/
 public/static/*.png
 public/static/*.mp4
+.DS_Store
