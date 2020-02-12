@@ -53,7 +53,7 @@
                             ${ d.in_reply_to_status_id_str !== null? `<a href="${window.location.origin}/tweet.html?id=${d.in_reply_to_status_id_str}" class="btn">View Reply Tweet</a>` : ``}
                         </div>
                         <div class="card-action">
-                        ${d.truncated ? constructDownloadLink(d.extended_tweet.extended_entities.media,false): d.extended_entities.length > 0 ?  constructDownloadLink(d.extended_entities[0].media,false): "No Tweet Media"}
+                        ${d.truncated ? d.extended_entities.media !== undefined ? constructDownloadLink(d.extended_tweet.extended_entities.media,false): "No Tweet Media" : d.extended_entities.length > 0 ?  constructDownloadLink(d.extended_entities[0].media,false): "No Tweet Media"}
                         </div>
                      </div>
                      </div>

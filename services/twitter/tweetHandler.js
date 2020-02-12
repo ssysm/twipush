@@ -18,7 +18,7 @@ function handleTweet(tweet) {
         handleReplyTweet(tweet.in_reply_to_status_id_str)
     }
     if (tweet.truncated) { // if the tweet is the new version of 280 char, get from extended_entities
-        if (tweet.extended_tweet.extended_entities.media.length !== 0) {
+        if(tweet.extended_tweet.extended_entities !== null){
             mediaDownloader(tweet.extended_tweet.extended_entities.media)
         }
     } else {
