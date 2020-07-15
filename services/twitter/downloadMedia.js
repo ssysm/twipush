@@ -2,6 +2,8 @@ const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
 module.exports = async(entities_list)=>{
+    if(entities_list === undefined)
+        entities_list = [];
     entities_list.map((d)=>{
         if(d.type === 'video'){
             d.video_info.variants = stripeVideos(d.video_info.variants);
