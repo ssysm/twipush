@@ -1,4 +1,5 @@
 const mediaDownloader = require('./downloadMedia');
+const mediaDownloaderS3 = require('./downloadMediaS3');
 const getTweet = require('./getTweet');
 const {Tweet} = require('../../models');
 function handleTweet(tweet) {
@@ -19,17 +20,29 @@ function handleTweet(tweet) {
     }
     if (tweet.truncated) { // if the tweet is the new version of 280 char, get from extended_entities
         if(tweet.extended_tweet.extended_entities !== null){
-            mediaDownloader(tweet.extended_tweet.extended_entities.media)
+            if(process.env.FILE_ENGINE === 's3') {
+                mediaDownloaderS3(tweet.extended_tweet.extended_entities.media)
+            }else{
+                mediaDownloader(tweet.extended_tweet.extended_entities.media)
+            }
         }
     } else {
         // retweet object sometimes doesn't contain a valid extended_entites
         if(tweet.extended_entities){
             if (tweet.extended_entities.length > 0) {
-                mediaDownloader(tweet.extended_entities[0].media)
+                if(process.env.FILE_ENGINE === 's3') {
+                    mediaDownloaderS3(tweet.extended_entities[0].media)
+                }else{
+                    mediaDownloader(tweet.extended_entities[0].media)
+                }
             }
             else if(typeof tweet.extended_entities == "object")
             {
-                mediaDownloader(tweet.extended_entities.media)
+                if(process.env.FILE_ENGINE === 's3') {
+                    mediaDownloaderS3(tweet.extended_entities.media)
+                }else{
+                    mediaDownloader(tweet.extended_entities.media)
+                }
             }
         }
     }

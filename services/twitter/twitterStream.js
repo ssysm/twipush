@@ -15,7 +15,7 @@ module.exports.runner = async () => {
     });
     let followIDs = [];
 
-    reloadFollowsIDs = async () => {
+    const reloadFollowsIDs = async () => {
         followIDs = [];
         let result = await Tracker.find().select('uid');
         result.forEach(d => {
@@ -32,13 +32,14 @@ module.exports.runner = async () => {
     })
     //Stream Event
     stream.on('tweet', function (tweet) {
-        if (checkDBList(followIDs, tweet.user.id_str) > -1) {
+        let dbIdx = checkDBList(followIDs, tweet.user.id_str)
+        if (dbIdx > -1) {
             Tweet
-                .create(tweet, (err, docs) => {
+                .create({fileEngine: process.env.FILE_ENGINE,...tweet}, async (err, docs) => {
                     if (err) {
                         console.error(err)
                     } else {
-                        handleTweet(docs)
+                        handleTweet(docs);
                         webhookTrigger({user: docs.user.screen_names, uid: docs.id_str, text: docs.text})
                     }
                     console.log(`[INFO] New tweet from ${docs.user.screen_name} stored with id ${docs.id_str}`)

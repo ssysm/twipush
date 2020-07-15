@@ -1,3 +1,4 @@
 [] Reload Follower Stream on the fly (hot reloading)
 [] Have a storage solution(S3?)
 [] Authentication
+[] Follower Counter

@@ -1,5 +1,8 @@
 const mongoose = require('mongoose');
 const TweetSchema = new mongoose.Schema({
+    fileEngine:{
+        type:String
+    },
     "created_at": {
         "type": "Date"
     },

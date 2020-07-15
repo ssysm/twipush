@@ -7,7 +7,7 @@ router.get('/latest', (req,res)=>{
 	Tweet
 		.find({isFeed: true })
 		.sort({created_at: -1})
-		.limit(120)
+		.limit(100)
 		.exec((err, docs)=>{
 			if (err) {
 				res.status(500).send(resBuilder(err, null));

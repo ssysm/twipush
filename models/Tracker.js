@@ -15,7 +15,10 @@ const TrackerSchema = new mongoose.Schema({
 	},
 	tags: [{
 		type: String
-	}]
+	}],
+	followers:{
+		type: String
+	}
 });
 TrackerSchema.index({
 	tags: 'text'
