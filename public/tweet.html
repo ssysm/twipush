@@ -72,6 +72,8 @@
             buildContent(data.quoted_status,data.fileEngine)
         }
             buildContent(data,data.fileEngine);
+            var elems = document.querySelectorAll('.materialboxed');
+            M.Materialbox.init(elems, {});
     })
 
     const buildMediaContent = (entities,fsEngine)=>{
@@ -81,11 +83,11 @@
             {
                 if(fsEngine === 's3'){
                   mediaElm.innerHTML += `
-                        <img src="${BUCKET_URL}/images/${item.id_str}.png" alt="${item.media_url_https}" class="responsive-img col m3 s12"/>
+                        <img src="${BUCKET_URL}/images/${item.id_str}.png" alt="${item.media_url_https}" class="responsive-img col m3 s12 materialboxed"/>
                     `
                 }else {
                   mediaElm.innerHTML += `
-                        <img src="${window.location.origin}/static/${item.id_str}.png" alt="${item.media_url_https}" class="responsive-img col m3 s12"/>
+                        <img src="${window.location.origin}/static/${item.id_str}.png" alt="${item.media_url_https}" class="responsive-img col m3 s12 materialboxed"/>
                     `
                 }
             }
