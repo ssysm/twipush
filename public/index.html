@@ -49,10 +49,21 @@
                             </p>
                             <br>
                             <a href="${window.location.origin}/tweet.html?id=${d.id_str}" class="btn">查看推特</a>
-                            ${ d.in_reply_to_status_id_str !== null? `<a href="${window.location.origin}/tweet.html?id=${d.in_reply_to_status_id_str}" class="btn">查看回复推特</a>` : ``}
+                            ${ d.in_reply_to_status_id_str !== null ? `<a href="${window.location.origin}/tweet.html?id=${d.in_reply_to_status_id_str}" class="btn">查看回复推特</a>` : ``}
                         </div>
+
                         <div class="card-action">
-                        ${d.truncated ? d.extended_entities.media !== undefined ? constructDownloadLink(d.extended_tweet.extended_entities.media,false,d.fileEngine): "无媒体文件" : d.extended_entities.length > 0 ?  constructDownloadLink(d.extended_entities[0].media,false,d.fileEngine): "无媒体文件"}
+                        ${d.truncated ?
+                            d.extended_entities.media !== undefined ?
+                                constructDownloadLink(d.extended_tweet.extended_entities.media,false,d.fileEngine): "无媒体文件"
+                            : d.extended_entities.length > 0 ?
+                                constructDownloadLink(d.extended_entities[0].media,false,d.fileEngine): "无媒体文件"
+                        }
+                        ${d.is_quote_status ? d.quoted_status.truncated ?
+                        d.quoted_status.extended_tweet.extended_entities.media !== undefined ?
+                            constructDownloadLink(d.quoted_status.extended_tweet.extended_entities.media,true,d.fileEngine): "无转推媒体文件"
+                        : d.quoted_status.extended_entities.length > 0 ?
+                            constructDownloadLink(d.quoted_status.extended_entities[0].media,true,d.fileEngine): "无转推媒体文件" : '' }
                         </div>
                      </div>
                      </div>
@@ -74,7 +85,7 @@
                       ".png" :
                       ".mp4"}">
                     ${isretweet ?
-                      `<span style='color: cornflowerblue'>RETWEET Media ${counter}</span>` :
+                      `<span style='color: cornflowerblue'>转推媒体 ${counter}</span>` :
                       `媒体 ` + counter}</a>`
                 }else {
                   downloadLink += `<a href="${window.location.origin}/static/${item.id_str}${item.type === 'photo' ?

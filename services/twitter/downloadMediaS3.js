@@ -1,7 +1,5 @@
 const axios = require('axios');
 const AWS = require('aws-sdk');
-const { promisify } = require("util");
-const path = require('path');
 const s3 = new AWS.S3({ apiVersion: '2006-03-01' })
 
 const bucketParams = {
@@ -10,6 +8,9 @@ const bucketParams = {
 }
 
 module.exports = async(entities_list)=>{
+    if(entities_list == null){
+        return ;
+    }
     entities_list.map((d)=>{
         if(d.type === 'video'){
             d.video_info.variants = stripeVideos(d.video_info.variants);
