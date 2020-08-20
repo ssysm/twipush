@@ -52,6 +52,7 @@
             retweetElm = document.querySelector('#retweet'),
             quotedElm = document.querySelector('#quoted');
             mediaElm = document.querySelector('#media');
+    const enableClassifier = localStorage.getItem('enable_classifier')
     axios.get('/tweet/' + idParam)
     .then(res=> res.data.result)
     .then(data=>{
@@ -75,11 +76,16 @@
             M.Materialbox.init(elems, {});
     })
 
-    const buildMediaContent = (entities,fsEngine)=>{
+    const buildMediaContent = async (entities,fsEngine)=>{
         for(let item of entities)
         {
             if(item.type === 'photo')
             {
+                const res = await axios.get("http://classifier.twipush.tes-project.xyz/predict/twipush?media_id="+item.id_str)
+                mediaElm.innerHTML += '<div>'
+                if(res.data.error){
+                    mediaElm.innerHTML += '<span>归类解析失败</span>'
+                }
                 if(fsEngine === 's3'){
                   mediaElm.innerHTML += `
                         <img src="${BUCKET_URL}/images/${item.id_str}.png" alt="${item.media_url_https}" class="responsive-img col m3 s12 materialboxed"/>
@@ -89,6 +95,13 @@
                         <img src="${window.location.origin}/static/${item.id_str}.png" alt="${item.media_url_https}" class="responsive-img col m3 s12 materialboxed"/>
                     `
                 }
+                if(res.data.error==false){
+                    mediaElm.innerHTML += `<span style="display:block">最佳判断:${LABLES[res.data.msg.best_inf[0]]}</span>`
+                        res.data.msg.complete_inf[0].map((v, i) => {
+                            mediaElm.innerHTML += `<span style="display:block">${LABLES[i]}:${(v * 100).toFixed(2)}%</span>`;
+                        })
+                }
+                mediaElm.innerHTML += '</div>'
             }
             else if(item.type === 'video')
             {
