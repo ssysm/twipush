@@ -53,6 +53,8 @@
             quotedElm = document.querySelector('#quoted');
             mediaElm = document.querySelector('#media');
     const enableClassifier = localStorage.getItem('enable_classifier')
+    const LABLES = ['无关紧要', '好图'];
+
     axios.get('/tweet/' + idParam)
     .then(res=> res.data.result)
     .then(data=>{
