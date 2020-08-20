@@ -81,7 +81,7 @@
         {
             if(item.type === 'photo')
             {
-                const res = await axios.get("http://classifier.twipush.tes-project.xyz/predict/twipush?media_id="+item.id_str)
+                const res = await axios.get("https://classifier.twipush.tes-project.xyz/predict/twipush?media_id="+item.id_str)
                 mediaElm.innerHTML += '<div>'
                 if(res.data.error){
                     mediaElm.innerHTML += '<span>归类解析失败</span>'
