@@ -84,8 +84,15 @@
             if(item.type === 'photo')
             {
                 const res = await axios.get("https://classifier.twipush.tes-project.xyz/predict/twipush?media_id="+item.id_str)
+                let predict_html = '';
+
+                if(res.data.error === false){
+                    res.data.msg.complete_inf[0].map((v, i) => {
+                        predict_html += `<span style="display:block">${LABLES[i]}:${(v * 100).toFixed(2)}%</span>`;
+                    })
+                }
                 mediaElm.innerHTML += `
-                <div>
+                <div class="col">
                     ${res.data.error ? '<span>归类解析失败</span>' : ''}
                     ${fsEngine === 's3' ? 
                         `<img src="${BUCKET_URL}/images/${item.id_str}.png" alt="${item.media_url_https}" class="responsive-img col m3 s12 materialboxed"/>`
@@ -94,15 +101,9 @@
                     }
                     <div>
                         ${res.data.error === false ?
-                            `<span style="display:block">最佳判断:${LABLES[res.data.msg.best_inf[0]]}</span>`
+                            `<span style="display:block">最佳判断:${LABLES[res.data.msg.best_inf[0]]}</span>` + predict_html
                             : ''
                         }
-                        ${res.data.error === false ?
-                            res.data.msg.complete_inf[0].map((v, i) => {
-                                return `<span style="display:block">${LABLES[i]}:${(v * 100).toFixed(2)}%</span>`;
-                            })
-                            :
-                        ''}
                     </div>
                 </div>
                 `
