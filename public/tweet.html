@@ -65,6 +65,7 @@
         retweetElm.innerHTML = typeof data.retweeted_status === "object" ? (data.retweeted_status.truncated ? data.retweeted_status.extended_tweet.full_text: data.retweeted_status.text) : "";
         quotedElm.innerHTML = data.is_quote_status ? (data.quoted_status.truncated ? data.quoted_status.extended_tweet.full_text: data.quoted_status.text) : "";
 
+        M.toast({html: '正在加载媒体...'})
         if(typeof data.retweeted_status === "object")
         {
             await buildContent(data.retweeted_status,data.fileEngine)
@@ -73,9 +74,10 @@
         {
             await buildContent(data.quoted_status,data.fileEngine)
         }
-            await buildContent(data,data.fileEngine);
-            var elems = document.querySelectorAll('.materialboxed');
-            M.Materialbox.init(elems, {});
+        await buildContent(data,data.fileEngine);
+        M.toast({html: '媒体加载完成!'})
+        var elems = document.querySelectorAll('.materialboxed');
+        M.Materialbox.init(elems, {});
     })
 
     const buildMediaContent = async (entities,fsEngine)=>{
