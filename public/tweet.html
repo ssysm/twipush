@@ -67,13 +67,13 @@
 
         if(typeof data.retweeted_status === "object")
         {
-            buildContent(data.retweeted_status,data.fileEngine)
+            await buildContent(data.retweeted_status,data.fileEngine)
         }
         else if(data.is_quote_status)
         {
-            buildContent(data.quoted_status,data.fileEngine)
+            await buildContent(data.quoted_status,data.fileEngine)
         }
-            buildContent(data,data.fileEngine);
+            await buildContent(data,data.fileEngine);
             var elems = document.querySelectorAll('.materialboxed');
             M.Materialbox.init(elems, {});
     })
