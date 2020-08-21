@@ -57,7 +57,7 @@
 
     axios.get('/tweet/' + idParam)
     .then(res=> res.data.result)
-    .then(data=>{
+    .then(async data=>{
         if(data == null) mainElm .innerHTML = ('404 Tweet Not Found')
         nameElm.innerHTML = data.user.name + '(' + data.user.screen_name + ')';
         dateElm.innerHTML = new Date(data.created_at).toLocaleString();
@@ -131,11 +131,11 @@
         }
     }
 
-    const buildContent= (tweet,fsEngine)=>{
+    const buildContent= async (tweet,fsEngine)=>{
         if(tweet.truncated){
             if(tweet.extended_tweet.extended_entities.media.length > 0)
             {
-                buildMediaContent(tweet.extended_tweet.extended_entities.media,fsEngine)
+                await buildMediaContent(tweet.extended_tweet.extended_entities.media,fsEngine)
             }
         }else{
             if(tweet.extended_entities !== undefined)
@@ -143,10 +143,10 @@
                 if(Array.isArray(tweet.extended_entities))
                 {
                     if(tweet.extended_entities.length > 0){
-                        buildMediaContent(tweet.extended_entities[0].media,fsEngine)
+                        await buildMediaContent(tweet.extended_entities[0].media,fsEngine)
                     }
                 }else{
-                    buildMediaContent(tweet.extended_entities.media,fsEngine)
+                    await buildMediaContent(tweet.extended_entities.media,fsEngine)
                 }
             }
         }
