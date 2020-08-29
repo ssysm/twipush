@@ -1,5 +1,7 @@
 const axios = require('axios');
 const AWS = require('aws-sdk');
+const { Highlight } = require('../../models')
+const { getS3PredictResult } = require('../classifier/getS3ClassifierResult')
 const s3 = new AWS.S3({ apiVersion: '2006-03-01' })
 
 const bucketParams = {
@@ -29,7 +31,7 @@ module.exports = async(entities_list)=>{
     });
 };
 
-const downloadImage = ({media_url_https,id_str},callback) =>{
+const downloadImage = ({media_url_https,id_str,expanded_url },callback) =>{
     axios({
         url: media_url_https,
         method: 'GET',
@@ -42,7 +44,9 @@ const downloadImage = ({media_url_https,id_str},callback) =>{
             const imgBuff = new Buffer.from(response.data, 'binary');
             const imgUploadParam = { ...bucketParams, Key: 'images/'+ id_str + '.png', Body: imgBuff };
             const s3Result = await s3.upload(imgUploadParam).promise();
+            const predictResult = await getS3PredictResult(id_str);
             callback(s3Result)
+            highlightRoutine(predictResult, expanded_url.split('/')[3], id_str)
         })
         .catch((e)=>{
             console.error('[ERROR] Fail to download media(photo) from twitter.')
@@ -67,6 +71,28 @@ const downloadVideo = (video_url, id_str, callback)=>{
         .catch((e)=> {
             console.error('[ERROR] Fail to download media(video) from twitter.')
         })
+}
+
+const highlightRoutine = (predictResult, imageOwner, image_id_str) => {
+    if(!predictResult.error){
+        if(predictResult.msg.best_inf[0] === 0) {
+            return;
+        }
+        console.log('[Info] Got Infer Result:' + JSON.stringify(predictResult.msg))
+        Highlight.create({
+            fileEngine: 's3',
+            conf_score: predictResult.msg.complete_inf[0][predictResult.msg.best_inf[0]],
+            user_id_str: imageOwner,
+            created_at: new Date(),
+            image: {
+                id_str: image_id_str
+            }
+        }).catch(e=> {
+            if(e.code === 11000){
+                console.warn('[Warn] Possible Duplicate Image:' + image_id_str)
+            }
+        })
+    }
 }
 
 const stripeVideos = (videoArr)=>{

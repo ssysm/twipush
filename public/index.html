@@ -1,107 +1,111 @@
 <!doctype html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <!-- Compiled and minified CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/materialize-css@1.0.0/dist/css/materialize.min.css">
     <script src="https://cdn.jsdelivr.net/npm/materialize-css@1.0.0/dist/js/materialize.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios@0.19.2/dist/axios.min.js"></script>
 
-    <title>Document</title>
+    <title>Home :: TwiPush</title>
 </head>
+
 <body>
-<nav>
-    <div class="nav-wrapper">
-        <a href="/index.html" class="brand-logo">TwiPush</a>
-        <ul id="nav-mobile" class="right hide-on-med-and-down">
-            <li><a href="/index.html">主页</a></li>
-<!--            <li><a href="/tracker.html">Tracker</a></li>-->
-        </ul>
+    <nav>
+        <div class="nav-wrapper">
+            <a href="/index.html" class="brand-logo">TwiPush</a>
+            <ul id="nav-mobile" class="right hide-on-med-and-down">
+                <li class="active"><a href="/index.html">主页</a></li>
+                <li ><a href="/highlight.html">好图共赏</a></li>
+            </ul>
+        </div>
+    </nav>
+    <div class="container" id="main">
     </div>
-</nav>
-<div class="container" id="main">
-</div>
-</body>
-<script>
-  const BUCKET_URL = 'https://twipush-s3.s3-ap-northeast-1.amazonaws.com'
-  const containerElm = document.querySelector('#main');
+    
+    <script>
+        const BUCKET_URL = 'https://twipush-s3.s3-ap-northeast-1.amazonaws.com'
+        const containerElm = document.querySelector('#main');
         let contentHtml = "";
         axios.get('/tweet/latest')
             .then(res => res.data.result)
             .then(data => {
                 data.map(d => {
                     containerElm.innerHTML += `
-                    <div class="row">
-                    <div class="card">
-                        <div class="card-title">
-                            ${d.user.name} (${d.user.screen_name})
-                            <br>
-                            ${new Date(d.created_at).toLocaleString()}
-                        </div>
-                         <div class="card-content">
-                            <span id="retweet_status">${typeof d.retweeted_status === "object" || typeof  d.quoted_status === "object" ? "<b>转推了</b>": ""}</span>
-                            <span id="reply_status">${d.in_reply_to_status_id_str !== null? "<b>回复了</b>" : ""}</span>
-                            <p>
-                            ${d.truncated ? d.extended_tweet.full_text: d.text}
-                            </p>
-                            <br>
-                            <a href="${window.location.origin}/tweet.html?id=${d.id_str}" class="btn">查看推特</a>
-                            ${ d.in_reply_to_status_id_str !== null ? `<a href="${window.location.origin}/tweet.html?id=${d.in_reply_to_status_id_str}" class="btn">查看回复推特</a>` : ``}
-                        </div>
-
-                        <div class="card-action">
-                        ${d.truncated ?
+                        <div class="row">
+                        <div class="card">
+                            <div class="card-title">
+                                ${d.user.name} (${d.user.screen_name})
+                                <br>
+                                ${new Date(d.created_at).toLocaleString()}
+                            </div>
+                             <div class="card-content">
+                                <span id="retweet_status">${typeof d.retweeted_status === "object" || typeof d.quoted_status === "object" ? "<b>转推了</b>" : ""}</span>
+                                <span id="reply_status">${d.in_reply_to_status_id_str !== null ? "<b>回复了</b>" : ""}</span>
+                                <p>
+                                ${d.truncated ? d.extended_tweet.full_text : d.text}
+                                </p>
+                                <br>
+                                <a href="${window.location.origin}/tweet.html?id=${d.id_str}" class="btn">查看推特</a>
+                                ${ d.in_reply_to_status_id_str !== null ? `<a href="${window.location.origin}/tweet.html?id=${d.in_reply_to_status_id_str}" class="btn">查看回复推特</a>` : ``}
+                            </div>
+    
+                            <div class="card-action">
+                            ${d.truncated ?
                             d.extended_entities.media !== undefined ?
-                                constructDownloadLink(d.extended_tweet.extended_entities.media,false,d.fileEngine): "无媒体文件"
+                                constructDownloadLink(d.extended_tweet.extended_entities.media, false, d.fileEngine) : "无媒体文件"
                             : d.extended_entities.length > 0 ?
-                                constructDownloadLink(d.extended_entities[0].media,false,d.fileEngine): "无媒体文件"
+                                constructDownloadLink(d.extended_entities[0].media, false, d.fileEngine) : "无媒体文件"
                         }
-                        <!--
-                         $d.is_quote_status ? d.quoted_status.truncated ?
-                        // d.quoted_status.extended_tweet.extended_entities.media !== undefined ?
-                        //     constructDownloadLink(d.quoted_status.extended_tweet.extended_entities.media,true,d.fileEngine): "无转推媒体文件"
-                        // : d.quoted_status.extended_entities.length > 0 ?
-                        //     constructDownloadLink(d.quoted_status.extended_entities[0].media,true,d.fileEngine): "无转推媒体文件" : '' }
-                   -->
-                        </div>
-                     </div>
-                     </div>
-                    `
+                            <!--
+                             $d.is_quote_status ? d.quoted_status.truncated ?
+                            // d.quoted_status.extended_tweet.extended_entities.media !== undefined ?
+                            //     constructDownloadLink(d.quoted_status.extended_tweet.extended_entities.media,true,d.fileEngine): "无转推媒体文件"
+                            // : d.quoted_status.extended_entities.length > 0 ?
+                            //     constructDownloadLink(d.quoted_status.extended_entities[0].media,true,d.fileEngine): "无转推媒体文件" : '' }
+                       -->
+                            </div>
+                         </div>
+                         </div>
+                        `
                 })
             })
-
-    const constructDownloadLink = (entities,isretweet,fsEngine)=>{
-        if(entities.length > 0)
-        {
-            let downloadLink = "";
-            let counter = 0;
-            for(let item of entities){
-                counter++;
-                if(fsEngine === 's3'){
-                  downloadLink += `<a href="${BUCKET_URL}/${item.type === 'photo' ?
-                      "images" :
-                      "video"}/${item.id_str}${item.type === 'photo' ?
-                      ".png" :
-                      ".mp4"}">
-                    ${isretweet ?
-                      `<span style='color: cornflowerblue'>转推媒体 ${counter}</span>` :
-                      `媒体 ` + counter}</a>`
-                }else {
-                  downloadLink += `<a href="${window.location.origin}/static/${item.id_str}${item.type === 'photo' ?
-                      ".png" :
-                      ".mp4"}">
-                    ${isretweet ?
-                      `<span style='color: cornflowerblue'>转推媒体 ${counter}</span>` :
-                      `媒体 ` + counter}</a>`
+    
+        const constructDownloadLink = (entities, isretweet, fsEngine) => {
+            if (entities.length > 0) {
+                let downloadLink = "";
+                let counter = 0;
+                for (let item of entities) {
+                    counter++;
+                    if (fsEngine === 's3') {
+                        downloadLink += `<a href="${BUCKET_URL}/${item.type === 'photo' ?
+                            "images" :
+                            "video"}/${item.id_str}${item.type === 'photo' ?
+                                ".png" :
+                                ".mp4"}">
+                        ${isretweet ?
+                                `<span style='color: cornflowerblue'>转推媒体 ${counter}</span>` :
+                                `媒体 ` + counter}</a>`
+                    } else {
+                        downloadLink += `<a href="${window.location.origin}/static/${item.id_str}${item.type === 'photo' ?
+                            ".png" :
+                            ".mp4"}">
+                        ${isretweet ?
+                                `<span style='color: cornflowerblue'>转推媒体 ${counter}</span>` :
+                                `媒体 ` + counter}</a>`
+                    }
                 }
+                return downloadLink;
+            } else {
+                return "<span>No Media</span>";
             }
-            return downloadLink;
-        }else{
-            return "<span>No Media</span>";
         }
-    }
-</script>
+    </script>
+</body>
+
+
 </html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/materialize-css@1.0.0/dist/css/materialize.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/materialize-css@1.0.0/dist/js/materialize.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@0.19.2/dist/axios.min.js"></script>
+
+    <title>Highlight :: TwiPush</title>
+
+    <style>
+        .btn-large{
+            display: inherit;
+            text-align: center;
+        }
+
+        #image-section{
+            height: 60vh;
+            display: flex;
+            align-items: center;
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <div class="nav-wrapper">
+            <a href="/index.html" class="brand-logo">TwiPush</a>
+            <ul id="nav-mobile" class="right hide-on-med-and-down">
+                <li><a href="/index.html">主页</a></li>
+                <li class="active"><a href="/highlight.html">好图共赏</a></li>
+            </ul>
+        </div>
+    </nav>
+    <div class="container" id="main">
+
+        <div class="row" style="text-align: center;">
+            <h4>TwiPush Lab:AI人图识别</h4>
+        </div>
+
+        <div class="row" id="image-section">
+            <div class="col s12 m8 offset-m2">
+                <div class="card">
+                    <div class="card-image">
+                        <img class="responsive-img materialboxed" src="https://via.placeholder.com/150" id="target-image">
+                        <span class="card-title" id="twi-username">1</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col s12 m8 offset-m2">
+                <a class="waves-effect waves-light btn-large" id="next-btn">下一个</a>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col offset-m2">
+                <a href="#" id="report-error" data-id="null">上报错误识别</a>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const BUCKET_URL = 'https://twipush-s3.s3-ap-northeast-1.amazonaws.com'
+        const containerElm = document.querySelector('#main');
+        const imageQueue = [] ;
+
+        const displayImage = (hightlight) => {
+            document.querySelector('#report-error').style.display = 'inline-block';
+            document.querySelector('#target-image').src = BUCKET_URL + '/images/' + hightlight.image.id_str + '.png'
+            document.querySelector('#twi-username').innerHTML = '@' + hightlight.user_id_str
+            document.querySelector('#report-error').setAttribute('data-id', hightlight.image.id_str)
+
+            var elems = document.querySelectorAll('.materialboxed');
+            M.Materialbox.init(elems, {});
+        };
+
+        const fetchHighlight = async () => {
+            try{
+                const docs = await axios.get('/highlight')
+                .then(res => res.data);
+                imageQueue.push(...docs.result)
+            }catch(err){
+                console.error(err)
+                M.toast({html: '获取失败'})
+            }
+        }
+
+        const reportFalsePositive = (media_id) => {
+            axios.patch('/highlight/report', { media_id })
+            .then(res => res.data)
+            .then(data=>{
+                M.toast({html: '上报成功'})
+            })
+            .catch(e=>{
+                M.toast({html: '上报失败'})
+                document.querySelector('#report_error').style.display = 'inline-block';
+            })
+        }
+
+        const popImageFromQueue = async (evt)=>{
+            const doc = imageQueue.pop();
+            displayImage(doc)
+            if(imageQueue.length <= 1){
+                evt.target.classList.add('disabled')
+                await fetchHighlight()
+                evt.target.classList.remove('disabled')
+            } 
+        }
+
+        document.querySelector('#next-btn').addEventListener('click', popImageFromQueue)
+
+        document.querySelector('#report-error').addEventListener('click', (evt)=>{
+            const mediaID = evt.target.getAttribute('data-id')
+            document.querySelector('#report-error').style.display = 'none';
+            reportFalsePositive(mediaID)
+        })
+
+        document.addEventListener('DOMContentLoaded', async ()=>{
+            await fetchHighlight();
+            document.querySelector('#next-btn').click();
+        })
+    </script>
+</body>
+
+</html>

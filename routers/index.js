@@ -4,5 +4,6 @@ module.exports = {
     trackerRouter: require('./tracker'),
     tweetRouter: require('./tweet'),
     lookupRouter: require('./lookup'),
-    webhookRouter: require('./webhook')
+    webhookRouter: require('./webhook'),
+    highlightRouter: require('./highlight')
 }

@@ -18,5 +18,6 @@ app.use('/tracker', routers.trackerRouter);
 app.use('/tweet', routers.tweetRouter);
 app.use('/lookup', routers.lookupRouter);
 app.use('/webhook', routers.webhookRouter);
+app.use('/highlight', routers.highlightRouter)
 
 module.exports = app;
