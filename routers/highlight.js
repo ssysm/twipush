@@ -6,7 +6,7 @@ const resBuilder = require('./../utils/responseBuilder');
 router.get('/', function(req, res, next) {
     Highlight
         .findRandom()
-        .limit(5)
+        .limit(25)
 		.exec((err, docs)=>{
 			if (err) {
 				res.status(500).send(resBuilder(err, null));
