@@ -31,6 +31,13 @@
             width: auto;
             margin: auto;
         }
+        .highlight-image-title{
+            position: relative;
+            font-size: 20px;
+            bottom: 50px;
+            left: 40%;
+            color: #fff;
+        }
     </style>
 </head>
 
@@ -55,33 +62,20 @@
             <h4>TwiPush Lab:AI人图识别</h4>
         </div>
 
-        <!-- <div class="row" id="image-section">
-            <div class="col s12 m8 offset-m2">
-                <div class="card">
-                    <div class="card-image">
-                        <img class="responsive-img materialboxed" src="https://via.placeholder.com/150" id="target-image">
-                        <span class="card-title" id="twi-username">1</span>
-                    </div>
-                </div>
-            </div>
-        </div> -->
         <div class="highlight-image">
             <img class="responsive-img materialboxed" src="https://via.placeholder.com/150" id="target-image">
+            <span class="highlight-image-title" id="twi-username">1</span>
         </div>
         
 
         <div class="row">
-            <div class="col s12 m8 offset-m2">
+            <div class="col s12 m8" style="position: fixed; bottom: 0; padding-bottom: 40px;">
                 <a class="waves-effect waves-light btn-large" id="next-btn">下一个</a>
             </div>
-        </div>
-
-        <div class="row">
-            <div class="col offset-m2">
+            <div class="col">
                 <a href="#" id="report-error" data-id="null">上报错误识别</a>
             </div>
         </div>
-
     </div>
 
     <script>
