@@ -91,6 +91,9 @@
             try{
                 const docs = await axios.get('/highlight')
                 .then(res => res.data);
+                if(docs.result.length === 0){
+                    M.toast({html: "没有好图可以看了"})
+                }
                 imageQueue.push(...docs.result)
             }catch(err){
                 console.error(err)

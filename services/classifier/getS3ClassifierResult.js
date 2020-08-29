@@ -1,6 +1,6 @@
 const axios = require('axios');
-
-const ENDPOINT = process.env.INFER_SERVER_URL + '/predict/twipush'
+const { inferEp } = require('../../const/endpoint')
+const ENDPOINT = inferEp + '/predict/twipush'
 
 const getS3PredictResult = async (media_id) => {
     try{
