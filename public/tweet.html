@@ -1,106 +1,116 @@
 <!doctype html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Tweet Detail :: TwiPush</title>
     <!-- Compiled and minified CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/materialize-css@1.0.0/dist/css/materialize.min.css">
     <script src="https://cdn.jsdelivr.net/npm/materialize-css@1.0.0/dist/js/materialize.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios@0.19.2/dist/axios.min.js"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
+
 <body>
-<nav>
-    <div class="nav-wrapper">
-        <a href="/index.html" class="brand-logo">TwiPush</a>
-        <ul id="nav-mobile" class="right hide-on-med-and-down">
-            <li><a href="/index.html">Home</a></li>
-        </ul>
-    </div>
-</nav>
-<div class="container" id="main">
-            <div class="row">
-                <div class="card">
-                    <div class="card-title">
-                        <span id="name"></span>
-                        <br>
-                        <span id="date"></span>
-                    </div>
+    <nav>
+        <div class="nav-wrapper">
+            <a href="/index.html" class="brand-logo">TwiPush</a>
+            <a href="#" data-target="mobile-nav" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+            <ul id="nav-mobile" class="right hide-on-med-and-down">
+                <li><a href="/index.html">主页</a></li>
+                <li><a href="/highlight.html">好图共赏</a></li>
+            </ul>
+        </div>
+    </nav>
+    <ul class="sidenav" id="mobile-nav">
+        <li><a href="/index.html">主页</a></li>
+        <li><a href="/highlight.html">好图共赏</a></li>
+    </ul>
+    <div class="container" id="main">
+        <div class="row">
+            <div class="card">
+                <div class="card-title">
+                    <span id="name"></span>
+                    <br>
+                    <span id="date"></span>
+                </div>
+                <div class="card-content">
+                    <span id="content"></span>
                     <div class="card-content">
-                        <span id="content"></span>
-                        <div class="card-content">
-                            <span id="retweet"></span>
-                            <span id="quoted"></span>
-                        </div>
-                        <hr>
-                        <span>以下是推特包含的媒体文件：</span>
-                        <div class="row" id="media"></div>
+                        <span id="retweet"></span>
+                        <span id="quoted"></span>
                     </div>
+                    <hr>
+                    <span>以下是推特包含的媒体文件：</span>
+                    <div class="row" id="media"></div>
                 </div>
             </div>
         </div>
-<script>
-    const BUCKET_URL = 'https://twipush-s3.s3-ap-northeast-1.amazonaws.com'
-    const urlParams = new URLSearchParams(window.location.search);
-    const idParam = urlParams.get('id');
-    const nameElm = document.querySelector('#name'),
+    </div>
+    <script>
+        const BUCKET_URL = 'https://twipush-s3.s3-ap-northeast-1.amazonaws.com'
+        const urlParams = new URLSearchParams(window.location.search);
+        const idParam = urlParams.get('id');
+        const nameElm = document.querySelector('#name'),
             mainElm = document.querySelector('#main'),
             dateElm = document.querySelector('#date'),
             contentElm = document.querySelector('#content'),
             retweetElm = document.querySelector('#retweet'),
             quotedElm = document.querySelector('#quoted');
-            mediaElm = document.querySelector('#media');
-    const enableClassifier = localStorage.getItem('enable_classifier')
-    const LABLES = ['无关紧要', '好图'];
+        mediaElm = document.querySelector('#media');
+        const enableClassifier = localStorage.getItem('enable_classifier')
+        const LABLES = ['无关紧要', '好图'];
 
-    axios.get('/tweet/' + idParam)
-    .then(res=> res.data.result)
-    .then(async data=>{
-        if(data == null) mainElm .innerHTML = ('404 Tweet Not Found')
-        nameElm.innerHTML = data.user.name + '(' + data.user.screen_name + ')';
-        dateElm.innerHTML = new Date(data.created_at).toLocaleString();
-        contentElm.innerHTML = data.truncated ? data.extended_tweet.full_text: data.text;
-        retweetElm.innerHTML = typeof data.retweeted_status === "object" ? (data.retweeted_status.truncated ? data.retweeted_status.extended_tweet.full_text: data.retweeted_status.text) : "";
-        quotedElm.innerHTML = data.is_quote_status ? (data.quoted_status.truncated ? data.quoted_status.extended_tweet.full_text: data.quoted_status.text) : "";
+        document.addEventListener('DOMContentLoaded', function () {
+            var elems = document.querySelectorAll('.sidenav');
+            var instances = M.Sidenav.init(elems, {});
+        });
 
-        M.toast({html: '正在加载媒体...'})
-        if(typeof data.retweeted_status === "object")
-        {
-            await buildContent(data.retweeted_status,data.fileEngine)
-        }
-        else if(data.is_quote_status)
-        {
-            await buildContent(data.quoted_status,data.fileEngine)
-        }
-        await buildContent(data,data.fileEngine);
-        M.toast({html: '媒体加载完成!'})
-        var elems = document.querySelectorAll('.materialboxed');
-        M.Materialbox.init(elems, {});
-    })
+        axios.get('/tweet/' + idParam)
+            .then(res => res.data.result)
+            .then(async data => {
+                if (data == null) mainElm.innerHTML = ('404 Tweet Not Found')
+                nameElm.innerHTML = data.user.name + '(' + data.user.screen_name + ')';
+                dateElm.innerHTML = new Date(data.created_at).toLocaleString();
+                contentElm.innerHTML = data.truncated ? data.extended_tweet.full_text : data.text;
+                retweetElm.innerHTML = typeof data.retweeted_status === "object" ? (data.retweeted_status.truncated ? data.retweeted_status.extended_tweet.full_text : data.retweeted_status.text) : "";
+                quotedElm.innerHTML = data.is_quote_status ? (data.quoted_status.truncated ? data.quoted_status.extended_tweet.full_text : data.quoted_status.text) : "";
 
-    const buildMediaContent = async (entities,fsEngine)=>{
-        for(let item of entities)
-        {
-            if(item.type === 'photo')
-            {
-                const res = await axios.get("https://classifier.twipush.tes-project.xyz/predict/twipush?media_id="+item.id_str)
-                let predict_html = '';
-
-                if(res.data.error === false){
-                    res.data.msg.complete_inf[0].map((v, i) => {
-                        predict_html += `<span style="display:block">${LABLES[i]}:${(v * 100).toFixed(2)}%</span>`;
-                    })
+                M.toast({ html: '正在加载媒体...' })
+                if (typeof data.retweeted_status === "object") {
+                    await buildContent(data.retweeted_status, data.fileEngine)
                 }
-                mediaElm.innerHTML += `
+                else if (data.is_quote_status) {
+                    await buildContent(data.quoted_status, data.fileEngine)
+                }
+                await buildContent(data, data.fileEngine);
+                M.toast({ html: '媒体加载完成!' })
+                var elems = document.querySelectorAll('.materialboxed');
+                M.Materialbox.init(elems, {});
+            })
+
+        const buildMediaContent = async (entities, fsEngine) => {
+            for (let item of entities) {
+                if (item.type === 'photo') {
+                    const res = await axios.get("https://classifier.twipush.tes-project.xyz/predict/twipush?media_id=" + item.id_str)
+                    let predict_html = '';
+
+                    if (res.data.error === false) {
+                        res.data.msg.complete_inf[0].map((v, i) => {
+                            predict_html += `<span style="display:block">${LABLES[i]}:${(v * 100).toFixed(2)}%</span>`;
+                        })
+                    }
+                    mediaElm.innerHTML += `
                 <div class="col">
                     ${res.data.error ? '<span>归类解析失败</span>' : ''}
-                    ${fsEngine === 's3' ? 
-                        `<img src="${BUCKET_URL}/images/${item.id_str}.png" alt="${item.media_url_https}" class="responsive-img col m3 s12 materialboxed"/>`
-                        :
-                        `<img src="${window.location.origin}/static/${item.id_str}.png" alt="${item.media_url_https}" class="responsive-img col m3 s12 materialboxed"/>`
-                    }
+                    ${fsEngine === 's3' ?
+                            `<img src="${BUCKET_URL}/images/${item.id_str}.png" alt="${item.media_url_https}" class="responsive-img col m3 s12 materialboxed"/>`
+                            :
+                            `<img src="${window.location.origin}/static/${item.id_str}.png" alt="${item.media_url_https}" class="responsive-img col m3 s12 materialboxed"/>`
+                        }
                     <div>
                         ${res.data.error === false ?
                             `<span style="display:block">最佳判断:${LABLES[res.data.msg.best_inf[0]]}</span>` + predict_html
@@ -109,51 +119,48 @@
                     </div>
                 </div>
                 `
-            }
-            else if(item.type === 'video')
-            {
-              if(fsEngine === 's3'){
-                mediaElm.innerHTML += `
+                }
+                else if (item.type === 'video') {
+                    if (fsEngine === 's3') {
+                        mediaElm.innerHTML += `
                         <video width="320" height="240" controls>
                             <source src="${BUCKET_URL}/videos/${item.id_str}.mp4" type="video/mp4">
                             <source src="${item.video_info.variants[0].url}" type="video/mp4">
                             Your browser does not support the video tag.
                         </video>
                     `
-              }else {
-                mediaElm.innerHTML += `
+                    } else {
+                        mediaElm.innerHTML += `
                         <video width="320" height="240" controls>
                             <source src="${window.location.origin}/static/${item.id_str}.mp4" type="video/mp4">
                             <source src="${item.video_info.variants[0].url}" type="video/mp4">
                             Your browser does not support the video tag.
                         </video>
                     `
-              }
-            }
-        }
-    }
-
-    const buildContent= async (tweet,fsEngine)=>{
-        if(tweet.truncated){
-            if(tweet.extended_tweet.extended_entities.media.length > 0)
-            {
-                await buildMediaContent(tweet.extended_tweet.extended_entities.media,fsEngine)
-            }
-        }else{
-            if(tweet.extended_entities !== undefined)
-            {
-                if(Array.isArray(tweet.extended_entities))
-                {
-                    if(tweet.extended_entities.length > 0){
-                        await buildMediaContent(tweet.extended_entities[0].media,fsEngine)
                     }
-                }else{
-                    await buildMediaContent(tweet.extended_entities.media,fsEngine)
                 }
             }
         }
-    }
 
-</script>
+        const buildContent = async (tweet, fsEngine) => {
+            if (tweet.truncated) {
+                if (tweet.extended_tweet.extended_entities.media.length > 0) {
+                    await buildMediaContent(tweet.extended_tweet.extended_entities.media, fsEngine)
+                }
+            } else {
+                if (tweet.extended_entities !== undefined) {
+                    if (Array.isArray(tweet.extended_entities)) {
+                        if (tweet.extended_entities.length > 0) {
+                            await buildMediaContent(tweet.extended_entities[0].media, fsEngine)
+                        }
+                    } else {
+                        await buildMediaContent(tweet.extended_entities.media, fsEngine)
+                    }
+                }
+            }
+        }
+
+    </script>
 </body>
+
 </html>
