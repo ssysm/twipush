@@ -1,4 +1,4 @@
-require('../startup')
+require('../startup/loadenv')
 const AWS = require('aws-sdk');
 const axios = require('axios');
 const { Highlight } = require('../models')
@@ -8,7 +8,8 @@ const s3 = new AWS.S3({ apiVersion: '2006-03-01' })
 var params = {
     Bucket: process.env.FILE_BUCKET, /* required */
     Delimiter: '/',
-    MaxKeys: 20,
+    MaxKeys: 50,
+    StartAfter: 200,
     Prefix: 'images/'  // Can be your folder name
 };
 s3.listObjectsV2(params, function (err, data) {
@@ -25,7 +26,7 @@ s3.listObjectsV2(params, function (err, data) {
             Highlight.create({
                 fileEngine: 's3',
                 conf_score: predictResult.msg.complete_inf[0][predictResult.msg.best_inf[0]],
-                user_id_str: 'populator',
+                user_id_str: 'twitter_user',
                 created_at: new Date(),
                 image: {
                     id_str: key

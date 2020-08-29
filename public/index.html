@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/materialize-css@1.0.0/dist/css/materialize.min.css">
     <script src="https://cdn.jsdelivr.net/npm/materialize-css@1.0.0/dist/js/materialize.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios@0.19.2/dist/axios.min.js"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
     <title>Home :: TwiPush</title>
 </head>
@@ -18,19 +19,30 @@
     <nav>
         <div class="nav-wrapper">
             <a href="/index.html" class="brand-logo">TwiPush</a>
+            <a href="#" data-target="mobile-nav" class="sidenav-trigger"><i class="material-icons">menu</i></a>
             <ul id="nav-mobile" class="right hide-on-med-and-down">
                 <li class="active"><a href="/index.html">主页</a></li>
-                <li ><a href="/highlight.html">好图共赏</a></li>
+                <li><a href="/highlight.html">好图共赏</a></li>
             </ul>
         </div>
     </nav>
+    <ul class="sidenav" id="mobile-nav">
+        <li class="active"><a href="/index.html">主页</a></li>
+        <li><a href="/highlight.html">好图共赏</a></li>
+    </ul>
     <div class="container" id="main">
     </div>
-    
+
     <script>
         const BUCKET_URL = 'https://twipush-s3.s3-ap-northeast-1.amazonaws.com'
         const containerElm = document.querySelector('#main');
         let contentHtml = "";
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var elems = document.querySelectorAll('.sidenav');
+            var instances = M.Sidenav.init(elems, {});
+        });
+
         axios.get('/tweet/latest')
             .then(res => res.data.result)
             .then(data => {
