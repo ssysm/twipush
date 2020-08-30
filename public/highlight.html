@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 
 <head>
     <meta charset="UTF-8">
@@ -31,16 +31,18 @@
             </ul>
         </div>
     </nav>
+
     <ul class="sidenav" id="mobile-nav">
         <li><a href="/index.html">主页</a></li>
         <li class="active"><a href="/highlight.html">好图共赏</a></li>
     </ul>
+
     <div class="container" id="main">
 
         <div class="row" style="text-align: center;">
             <h4>TwiPush Lab:AI人图识别</h4>
         </div>
-
+        <!--Populated by script-->
         <div class="row" id="highlight-section">
         </div>
 
@@ -61,26 +63,23 @@
         }
 
         const displayImage = (highlights) => {
-
             highlights.map(highlight => {
                 secElm.insertAdjacentHTML('beforeend',`
                 <div class="col s12 m4">
                     <div class="card">
                         <div class="card-image">
                             <img class="responsive-img materialboxed-batch-${pageStatus.page}" src="${BUCKET_URL + '/images/' + highlight.image.id_str + '.png'}">
-                            <span class="card-title">${highlight.user_id_str}</span>
+                            <span class="card-title">@${highlight.user_id_str}</span>
                         </div>
                         <div class="card-content">
                             <span>自信度: ${(highlight.conf_score * 100).toFixed(2)}%</span>
                             <a style="cursor:pointer" onClick="reportFalsePositive(this)" data-id="${highlight.image.id_str}">上报错误识别</a>
                         </div>
                     </div>
-                </div>
-                `)
+                </div>`)
             })
 
-            var elems = document.querySelectorAll('.materialboxed-batch-' + pageStatus.page);
-            M.Materialbox.init(elems, {});
+            M.Materialbox.init(document.querySelectorAll('.materialboxed-batch-' + pageStatus.page), {});
         };
 
         const fetchHighlight = async () => {
@@ -115,14 +114,12 @@
             })
         }
 
-
         document.querySelector('#next-btn').addEventListener('click', async (evt)=>{
             await fetchHighlight();
         })        
 
         document.addEventListener('DOMContentLoaded', async ()=>{
-            var elems = document.querySelectorAll('.sidenav');
-            var instances = M.Sidenav.init(elems, {});
+            var instances = M.Sidenav.init(document.querySelectorAll('.sidenav'), {});
             await fetchHighlight();
         });
     </script>

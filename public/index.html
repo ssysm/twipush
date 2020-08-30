@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
 
 <head>
     <meta charset="UTF-8">
@@ -36,18 +36,18 @@
     <script>
         const BUCKET_URL = 'https://twipush-s3.s3-ap-northeast-1.amazonaws.com'
         const containerElm = document.querySelector('#main');
-        let contentHtml = "";
 
-        document.addEventListener('DOMContentLoaded', function () {
-            var elems = document.querySelectorAll('.sidenav');
-            var instances = M.Sidenav.init(elems, {});
+        document.addEventListener('DOMContentLoaded', () => {
+            M.Sidenav.init(document.querySelectorAll('.sidenav'), {});
+            getTweets();
         });
 
-        axios.get('/tweet/latest')
+        const getTweets = ()=>{
+            axios.get('/tweet/latest')
             .then(res => res.data.result)
             .then(data => {
                 data.map(d => {
-                    containerElm.innerHTML += `
+                    containerElm.insertAdjacentHTML('beforeend',`
                         <div class="row">
                         <div class="card">
                             <div class="card-title">
@@ -83,9 +83,10 @@
                             </div>
                          </div>
                          </div>
-                        `
+                        `)
                 })
             })
+        }
     
         const constructDownloadLink = (entities, isretweet, fsEngine) => {
             if (entities.length > 0) {

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
 
 <head>
     <meta charset="UTF-8">
@@ -64,15 +64,16 @@
         const enableClassifier = localStorage.getItem('enable_classifier')
         const LABLES = ['无关紧要', '好图'];
 
-        document.addEventListener('DOMContentLoaded', function () {
-            var elems = document.querySelectorAll('.sidenav');
-            var instances = M.Sidenav.init(elems, {});
+        document.addEventListener('DOMContentLoaded', () => {
+            M.Sidenav.init(document.querySelectorAll('.sidenav'), {});
+            fetchTweet();
         });
 
-        axios.get('/tweet/' + idParam)
+        const fetchTweet = ()=>{
+            axios.get('/tweet/' + idParam)
             .then(res => res.data.result)
             .then(async data => {
-                if (data == null) mainElm.innerHTML = ('404 Tweet Not Found')
+                if (data == null) mainElm.innerHTML = ('404 Tweet 找不到')
                 nameElm.innerHTML = data.user.name + '(' + data.user.screen_name + ')';
                 dateElm.innerHTML = new Date(data.created_at).toLocaleString();
                 contentElm.innerHTML = data.truncated ? data.extended_tweet.full_text : data.text;
@@ -91,6 +92,10 @@
                 var elems = document.querySelectorAll('.materialboxed');
                 M.Materialbox.init(elems, {});
             })
+            .catch(e=>{
+                M.toast({html: '加载Tweet出错'})
+            })
+        }
 
         const buildMediaContent = async (entities, fsEngine) => {
             for (let item of entities) {

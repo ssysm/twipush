@@ -34,6 +34,19 @@ router.get('/random', async (req,res)=> {
     })
 })
 
+router.delete('/:id/unclassify', async (req,res)=> {
+    const { id } = req.params;
+    Highlight
+    .remove({ 'image.id_str': id })
+    .exec((err, docs)=>{
+        if (err) {
+            res.status(500).send(resBuilder(err, null));
+        } else {
+            res.send(resBuilder(null, docs));
+        }
+    })
+})
+
 router.patch('/report', async (req,res) => {
     const { media_id } = req.body;
     try{
