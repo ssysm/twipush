@@ -17,27 +17,6 @@
             display: inherit;
             text-align: center;
         }
-
-        #image-section{
-            height: 60vh;
-            display: flex;
-            align-items: center;
-        }
-        .highlight-image{
-            margin-bottom: 20px;
-        }
-        .highlight-image img{
-            max-height: 500px;
-            width: auto;
-            margin: auto;
-        }
-        .highlight-image-title{
-            position: relative;
-            font-size: 20px;
-            bottom: 50px;
-            left: 40%;
-            color: #fff;
-        }
     </style>
 </head>
 
@@ -62,52 +41,69 @@
             <h4>TwiPush Lab:AI人图识别</h4>
         </div>
 
-        <div class="highlight-image">
-            <img class="responsive-img materialboxed" src="https://via.placeholder.com/150" id="target-image">
-            <span class="highlight-image-title" id="twi-username">1</span>
+        <div class="row" id="highlight-section">
         </div>
-        
 
         <div class="row">
-            <div class="col s10 m8 push-s1" style="position: fixed; bottom: 0; padding-bottom: 40px;">
-                <a class="waves-effect waves-light btn-large" id="next-btn">下一个</a>
-            </div>
-            <div class="col">
-                <a href="#" id="report-error" data-id="null">上报错误识别</a>
+            <div class="col s12">
+                <a class="waves-effect waves-light btn-large" id="next-btn">再来一点</a>
             </div>
         </div>
     </div>
 
     <script>
         const BUCKET_URL = 'https://twipush-s3.s3-ap-northeast-1.amazonaws.com'
-        const containerElm = document.querySelector('#main');
-        const imageQueue = [] ;
+        const secElm = document.querySelector('#highlight-section');
 
-        const displayImage = (hightlight) => {
-            document.querySelector('#report-error').style.display = 'inline-block';
-            document.querySelector('#target-image').src = BUCKET_URL + '/images/' + hightlight.image.id_str + '.png'
-            document.querySelector('#twi-username').innerHTML = '@' + hightlight.user_id_str
-            document.querySelector('#report-error').setAttribute('data-id', hightlight.image.id_str)
+        let pageStatus = {
+            page: 1,
+            limit: 5
+        }
 
-            var elems = document.querySelectorAll('.materialboxed');
+        const displayImage = (highlights) => {
+
+            highlights.map(highlight => {
+                secElm.insertAdjacentHTML('beforeend',`
+                <div class="col s12 m4">
+                    <div class="card">
+                        <div class="card-image">
+                            <img class="responsive-img materialboxed-batch-${pageStatus.page}" src="${BUCKET_URL + '/images/' + highlight.image.id_str + '.png'}">
+                            <span class="card-title">${highlight.user_id_str}</span>
+                        </div>
+                        <div class="card-content">
+                            <span>自信度: ${(highlight.conf_score * 100).toFixed(2)}%</span>
+                            <a style="cursor:pointer" onClick="reportFalsePositive(this)" data-id="${highlight.image.id_str}">上报错误识别</a>
+                        </div>
+                    </div>
+                </div>
+                `)
+            })
+
+            var elems = document.querySelectorAll('.materialboxed-batch-' + pageStatus.page);
             M.Materialbox.init(elems, {});
         };
 
         const fetchHighlight = async () => {
             try{
-                const docs = await axios.get('/highlight')
+                const docs = await axios.get('/highlight', {
+                    params: pageStatus
+                })
                 .then(res => res.data);
-                if(docs.result.length === 0){
+                if(docs.result.length === 0 || docs.result.length < pageStatus.limit ){
                     M.toast({html: "没有好图可以看了"})
+                    document.querySelector('#next-btn').classList.add('disabled');
                 }
-                imageQueue.push(...docs.result)
+                pageStatus.page++;
+                displayImage(docs.result)
             }catch(err){
                 console.error(err)
                 M.toast({html: '获取失败'})
             }
         }
 
-        const reportFalsePositive = (media_id) => {
+        const reportFalsePositive = (target) => {
+            const media_id = target.getAttribute('data-id')
+            target.style.display = 'none';
             axios.patch('/highlight/report', { media_id })
             .then(res => res.data)
             .then(data=>{
@@ -115,33 +111,19 @@
             })
             .catch(e=>{
                 M.toast({html: '上报失败'})
-                document.querySelector('#report_error').style.display = 'inline-block';
+                target.style.display = 'inline-block';
             })
         }
 
-        const popImageFromQueue = async (evt)=>{
-            const doc = imageQueue.pop();
-            displayImage(doc)
-            if(imageQueue.length <= 1){
-                evt.target.classList.add('disabled')
-                await fetchHighlight()
-                evt.target.classList.remove('disabled')
-            } 
-        }
 
-        document.querySelector('#next-btn').addEventListener('click', popImageFromQueue)
-
-        document.querySelector('#report-error').addEventListener('click', (evt)=>{
-            const mediaID = evt.target.getAttribute('data-id')
-            document.querySelector('#report-error').style.display = 'none';
-            reportFalsePositive(mediaID)
-        })
+        document.querySelector('#next-btn').addEventListener('click', async (evt)=>{
+            await fetchHighlight();
+        })        
 
         document.addEventListener('DOMContentLoaded', async ()=>{
             var elems = document.querySelectorAll('.sidenav');
             var instances = M.Sidenav.init(elems, {});
             await fetchHighlight();
-            document.querySelector('#next-btn').click();
         });
     </script>
 </body>

@@ -4,9 +4,14 @@ const { Highlight } = require('../models')
 const resBuilder = require('./../utils/responseBuilder');
 
 router.get('/', function(req, res, next) {
+    const { page, limit } = req.query;
+    const pageInt = parseInt(page);
+    const limitInt = parseInt(limit);
     Highlight
-        .findRandom()
-        .limit(25)
+        .find()
+        .sort({created_at: -1})
+        .skip(limitInt * (pageInt - 1))
+        .limit(limitInt)
 		.exec((err, docs)=>{
 			if (err) {
 				res.status(500).send(resBuilder(err, null));
