@@ -40,7 +40,7 @@ module.exports.runner = async () => {
                         console.error(err)
                     } else {
                         handleTweet(docs);
-                        webhookTrigger({user: docs.user.screen_names, uid: docs.id_str, text: docs.text})
+                        webhookTrigger({ type:'tweet', data: { user: docs.user.screen_names, uid: docs.id_str, text: docs.text}})
                     }
                     console.log(`[INFO] New tweet from ${docs.user.screen_name} stored with id ${docs.id_str}`)
                 })

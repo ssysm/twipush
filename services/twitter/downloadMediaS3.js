@@ -2,6 +2,7 @@ const axios = require('axios');
 const AWS = require('aws-sdk');
 const { Highlight } = require('../../models')
 const { getS3PredictResult } = require('../classifier/getS3ClassifierResult')
+const webhookTrigger = require('../../utils/webhookTrigger')
 const s3 = new AWS.S3({ apiVersion: '2006-03-01' })
 
 const bucketParams = {
@@ -87,7 +88,14 @@ const highlightRoutine = (predictResult, imageOwner, image_id_str) => {
             image: {
                 id_str: image_id_str
             }
-        }).catch(e=> {
+        })
+        .then(doc=> {
+            webhookTrigger({
+                type: 'highlight',
+                doc
+            })
+        })
+        .catch(e=> {
             if(e.code === 11000){
                 console.warn('[Warn] Possible Duplicate Image:' + image_id_str)
             }
