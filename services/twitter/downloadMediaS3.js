@@ -3,7 +3,8 @@ const AWS = require('aws-sdk');
 const { Highlight } = require('../../models')
 const { getS3PredictResult } = require('../classifier/getS3ClassifierResult')
 const webhookTrigger = require('../../utils/webhookTrigger')
-const s3 = new AWS.S3({ apiVersion: '2006-03-01' })
+const s3 = new AWS.S3({ apiVersion: '2006-03-01' });
+const InferConst = require('../../const/infer');
 
 const bucketParams = {
     Bucket: process.env.FILE_BUCKET,
@@ -79,7 +80,10 @@ const highlightRoutine = (predictResult, imageOwner, image_id_str) => {
         if(predictResult.msg.best_inf[0] === 0) {
             return;
         }
-        console.log('[Info] Got Infer Result:' + JSON.stringify(predictResult.msg))
+        console.log('[Info] Got Infer Result:' + JSON.stringify(predictResult.msg));
+        if(predictResult.msg.complete_inf[0][predictResult.msg.best_inf[0]] < InferConst.SAVE_CONF_SCORE) {
+            return;
+        }
         Highlight.create({
             fileEngine: 's3',
             conf_score: predictResult.msg.complete_inf[0][predictResult.msg.best_inf[0]],
